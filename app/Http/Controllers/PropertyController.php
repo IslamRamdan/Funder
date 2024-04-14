@@ -1,0 +1,271 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Category;
+use App\Models\Location;
+use App\Models\Property;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+
+
+class PropertyController extends Controller
+{
+    // all properties
+    public function all()
+    {
+        $properties = Property::all();
+
+        return response()->json([
+            'success' => true,
+            'properties' => $properties
+        ]);
+    }
+
+    // get property by id
+    public function propById($id)
+    {
+        $property = Property::find($id);
+        if (!$property) {
+            return response()->json([
+                'error' => 'property not found',
+            ], 400);
+        }
+
+        $count_sheres = $property->receipts()->count();
+
+        if ($count_sheres == $property->funder_count + $property->funder_count * 1 / 5) {
+            return response()->json([
+                'success' => true,
+                'properties' => $property,
+                'message' => 'Number of orders completed'
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'properties' => $property
+        ]);
+    }
+
+    // properties by category name
+    public function propByCateName($name)
+    {
+        $category = Category::where('name', $name)->first();
+        if (!$category) {
+            return response()->json([
+                'message' => 'Category not found',
+            ], 400);
+        }
+
+        return response()->json([
+            'success' => true,
+            'properties' => $category->properties
+        ]);
+    }
+
+    // create property
+    public function create(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'images' => 'required',
+            'description' => 'required',
+            'funded_date' => 'required|date',
+            'purchase_price' => 'required',
+            'funder_count' => 'required',
+            'rental_income' => 'required',
+            'current_rent' => 'required',
+            'percent' => 'required',
+            'location_string' => 'required',
+            'property_price_total' => 'required',
+            'transaction_costs' => 'required',
+            'service_charge' => 'required',
+            'latitude' => 'required',
+            'longitude' => 'required',
+            'category_id' => 'required',
+        ]);
+
+        $category = Category::find($request->category_id);
+        if (!$category) {
+            return response()->json([
+                'message' => 'Category not found',
+            ], 400);
+        }
+
+        $property = new Property();
+
+        $property->name = $request->name;
+        $property->description = $request->description;
+        $property->funded_date = $request->funded_date;
+        $property->purchase_price = $request->purchase_price;
+        $property->funder_count = $request->funder_count;
+        $property->rental_income = $request->rental_income;
+        $property->current_rent = $request->current_rent;
+        $property->percent = $request->percent;
+        $property->location_string = $request->location_string;
+        $property->property_price_total = $request->property_price_total;
+        $property->transaction_costs = $request->transaction_costs;
+        $property->service_charge = $request->service_charge;
+        $property->category_id = $request->category_id;
+        $property->property_price = intval($request->property_price_total / $request->funder_count);
+
+        $imagesName = [];
+        if ($request->has('images')) {
+            foreach ($request->file('images') as $file) {
+                $filename = Str::random(32) . "." . $file->getClientOriginalExtension();
+                $file->move('uploads/', $filename);
+                array_push($imagesName, $filename);
+            }
+
+            $property->images = $imagesName;
+            $property->save();
+        } else {
+            return response()->json([
+                'error' => 'image not found',
+            ], 400);
+        }
+
+        $location = Location::create([
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+            'property_id' => $property->id
+        ]);
+        $property->location()->save($location);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'property created successfully',
+        ]);
+    }
+
+    // update property
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required',
+            'images' => 'nullable',
+            'img_delete' => 'nullable',
+            'description' => 'required',
+            'funded_date' => 'required',
+            'purchase_price' => 'required',
+            'funder_count' => 'required',
+            'rental_income' => 'required',
+            'current_rent' => 'required',
+            'percent' => 'required',
+            'location_string' => 'required',
+            'property_price_total' => 'required',
+            'transaction_costs' => 'required',
+            'service_charge' => 'required',
+            'latitude' => 'required',
+            'longitude' => 'required',
+        ]);
+
+        $property = Property::find($id);
+        if (!$property) {
+            return response()->json([
+                'message' => 'property not found',
+            ], 400);
+        }
+
+        $property->name = $request->name;
+        $property->description = $request->description;
+        $property->funded_date = $request->funded_date;
+        $property->purchase_price = $request->purchase_price;
+        $property->funder_count = $request->funder_count;
+        $property->rental_income = $request->rental_income;
+        $property->current_rent = $request->current_rent;
+        $property->percent = $request->percent;
+        $property->location_string = $request->location_string;
+        $property->property_price_total = $request->property_price_total;
+        $property->transaction_costs = $request->transaction_costs;
+        $property->service_charge = $request->service_charge;
+
+        $property->property_price = $property->property_price_total / $property->funder_count;
+
+        $property->location()->update([
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude
+        ]);
+
+        $imagesA = $property->images;
+        if ($request->has('images')) {
+            foreach ($request->file('images') as $file) {
+                $filename = Str::random(32) . "." . $file->getClientOriginalExtension();
+                $file->move('uploads/', $filename);
+                array_push($imagesA, $filename);
+            }
+        }
+
+        if ($request->has('img_delete')) {
+            foreach ($request->delete_image as $image) {
+                if (in_array($image, $imagesA)) {
+                    $index = array_search($image, $imagesA);
+                    if ($index !== false) {
+                        unset($imagesA[$index]);
+                    }
+                }
+            }
+        }
+
+        $property->images = [...$imagesA];
+
+        $property->save();
+        return response()->json([
+            'success' => true,
+            'message' => 'property updated successfully',
+        ]);
+    }
+
+    // delete property
+    public function delete($id)
+    {
+        $property = Property::find($id);
+        if (!$property) {
+            return response()->json([
+                'message' => 'property not found',
+            ], 400);
+        }
+
+        $property->delete();
+        return response()->json([
+            'success' => true,
+            'message' => 'property deleted successfully'
+        ]);
+    }
+
+    // filter properties
+    public function filter(Request $request)
+    {
+        $request->validate([
+            'search' => 'required',
+        ]);
+
+        $query = Property::query();
+
+        $query->where('status', null);
+        $query->where('name', $request->search);
+
+        if (isset($request->location) && $request->location != null) {
+            $query->where('location_string', $request->location);
+        }
+        // if (isset($request->min) && $request->min != null) {
+        //     $query->where('property_price_total', '>=', $request->min);
+        // }
+        // if (isset($request->max) && $request->max != null) {
+        //     $query->where('property_price_total', '<=', $request->max);
+        // }
+        if (isset($request->category) && $request->category != null) {
+            $query->whereHas('category', function ($q) use ($request) {
+                $q->whereIn('id', $request->category);
+            });
+        }
+
+        $properties = $query->get();
+
+        return response()->json([
+            'success' => true,
+            'properties' => $properties
+        ]);
+    }
+}
