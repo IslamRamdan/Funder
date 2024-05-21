@@ -3,13 +3,16 @@
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\ReceipysController;
+use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SocialiteController;
 use App\Http\Controllers\TermsController;
 use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\user\AuthUsersController;
 use App\Http\Controllers\user\IdentificationController;
+use App\Http\Controllers\WalletController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -51,44 +54,30 @@ Route::get('/google/callback', [SocialiteController::class, 'handleGoogleCallbac
 // login & register with facebook account
 Route::get('/facebook/callback', [SocialiteController::class, 'handleFacebookCallback']);
 
+// user profile
+Route::post('/profile', [AuthUsersController::class, 'profile'])->middleware('auth:sanctum');
+
+
 
 // identification user
-// all identification
-Route::get('/user/identification', [IdentificationController::class, 'allIdentification']); //admin
 // add identification
 Route::post('/user/identification', [IdentificationController::class, 'addIdentification']);
-// identification valid
-Route::get('/user/identification/valid/{id}', [IdentificationController::class, 'valid']); //admin
-// identification not valid
-Route::get('/user/identification/not_valid/{id}', [IdentificationController::class, 'notValid']); //admin
+
 
 
 // terms
 Route::get('/terms', [TermsController::class, 'terms']);
-// add term
-Route::post('/terms', [TermsController::class, 'addTerm']); //admin
-// update term
-Route::post('/term/{id}', [TermsController::class, 'updateTerm']); //admin
-// delete term
-Route::delete('/term/{id}', [TermsController::class, 'delete']); //admin
-
 
 // category
 Route::get('/category', [CategoryController::class, 'all']);
 // category by id
 Route::get('/category/{id}', [CategoryController::class, 'cateById']);
-// add category
-Route::post('/category', [CategoryController::class, 'add']); //admin
-// update category
-Route::post('/category/{id}', [CategoryController::class, 'update']); //admin
-// delete category
-Route::delete('/category/{id}', [CategoryController::class, 'delete']); //admin
 
 
 // Property
 Route::get('/properties', [PropertyController::class, 'all']);
 // Property by id
-Route::get('/properties/{id}', [PropertyController::class, 'propById']);
+Route::get('/properties/{id}', [PropertyController::class, 'propById'])->middleware('auth:sanctum');
 // get all properties by category name
 Route::get('/{categoryName}/properties', [PropertyController::class, 'propByCateName']);
 // create property
@@ -99,6 +88,8 @@ Route::post('/properties/{id}', [PropertyController::class, 'update']); //admin
 Route::delete('/properties/{id}', [PropertyController::class, 'delete']); //admin
 // fillter properties
 Route::post('/property/filter', [PropertyController::class, 'filter']);
+// all locations
+Route::get('/locations', [PropertyController::class, 'locations']);
 
 
 // get Timelines by property id
@@ -120,6 +111,16 @@ Route::delete('/favorites/{id}', [FavoriteController::class, 'delete'])->middlew
 // clear all Favorites
 Route::delete('/favorites', [FavoriteController::class, 'clearAll'])->middleware('auth:sanctum');
 
+// payment methods
+// get all payments
+Route::get('/payment', [PaymentController::class, 'all']);
+// create a new payment
+Route::post('/payment', [PaymentController::class, 'create']);
+// update payment
+Route::post('/payment/{id}', [PaymentController::class, 'update']);
+// delete payment
+Route::delete('/payment/{id}', [PaymentController::class, 'delete']);
+
 
 // get receipts by user
 Route::get('/receipt', [ReceipysController::class, 'getReceiptsByuser'])->middleware('auth:sanctum');
@@ -129,10 +130,19 @@ Route::get('/receipt/{id}', [ReceipysController::class, 'receiptById'])->middlew
 Route::get('/receipt/status/{status}', [ReceipysController::class, 'receiptByStatus'])->middleware('auth:sanctum');
 // create receipts
 Route::post('/receipt', [ReceipysController::class, 'create'])->middleware('auth:sanctum');
-// accepted receipt
-Route::get('/receipt/accepted/{id}', [ReceipysController::class, 'accepted']);
-// rejected receipt
-Route::get('/receipt/rejected/{id}', [ReceipysController::class, 'rejected']);
+
+
+// sales property
+Route::get('/sales', [SaleController::class, 'sales'])->middleware('auth:sanctum');
+// create property
+Route::post('/sales', [SaleController::class, 'create'])->middleware('auth:sanctum');
+
+
+// Wallet 
+Route::get('/wallet', [WalletController::class, 'wallet'])->middleware('auth:sanctum');
+// get Properties in which the user participates
+Route::get('/Properties/shere', [WalletController::class, 'propOfSheres'])->middleware('auth:sanctum');
+
 
 
 // notifications 

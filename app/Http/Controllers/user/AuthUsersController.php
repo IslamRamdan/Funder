@@ -220,4 +220,47 @@ class AuthUsersController extends Controller
 
         return response()->Json(['success' => true, "token" => $token, "message" => "Success updating password"], 200);
     }
+
+    // profile 
+    public function profile(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'phone' => 'required',
+            'image' => 'nullable',
+        ]);
+
+        $user = auth()->user();
+        $user->name = $request->name;
+        $user->phone = $request->phone;
+
+        if ($request->has('image')) {
+            $filename = Str::random(32) . "." . $request->image->getClientOriginalExtension();
+            $request->image->move('uploads/', $filename);
+            $user->image = $filename;
+        }
+
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+        ]);
+    }
+
+    // all users 
+    public function users()
+    {
+        $usersWithUserRole = User::whereHas('role', function ($query) {
+            $query->where('role', 'user');
+        })->with('role')->get();
+
+        return view('Users.users', ['users' => $usersWithUserRole]);
+    }
+
+    // all users 
+    public function show($id)
+    {
+        $user = User::find($id);
+        return view('Users.read-more', ['user' => $user]);
+    }
 }

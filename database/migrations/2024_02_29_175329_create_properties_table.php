@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('properties', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('description');
+            $table->text('description');
             $table->string('images');
             $table->date('funded_date');
             $table->integer('purchase_price');
@@ -25,6 +25,10 @@ return new class extends Migration
             $table->string('location_string');
             $table->integer('property_price_total');
             $table->string('property_price');
+            $table->string('discount');
+            $table->string('estimated_annualised_return');
+            $table->string('estimated_annual_appreciation');
+            $table->string('estimated_projected_gross_yield');
             $table->integer('transaction_costs');
             $table->integer('service_charge');
             $table->string('status')->nullable();

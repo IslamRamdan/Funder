@@ -13,13 +13,16 @@ class IdentificationController extends Controller
     // all identification waiting
     public function allIdentification()
     {
-        $identifications = Identification::where('status', 'Waiting')->get();
-
-        return response()->json([
-            'success' => true,
-            "identifications" => $identifications
-        ]);
+        $identifications = Identification::orderByRaw("status = 'Waiting' DESC")->get();
+        return view('Requests.Identify.identify', ['identifications' => $identifications]);
     }
+
+    public function show($id)
+    {
+        $identify = Identification::find($id);
+        return view('Requests.Identify.read-more', ['identify' => $identify]);
+    }
+
 
     // identification user
     public function addIdentification(Request $request)
@@ -90,9 +93,7 @@ class IdentificationController extends Controller
         $user->identification_verified_at = now();
         $user->save();
 
-        return response()->json([
-            'success' => true,
-        ]);
+        return redirect()->route('identify.show', $id);
     }
 
     // Identity not valid
@@ -108,8 +109,6 @@ class IdentificationController extends Controller
         $identification->status = 'not valid';
         $identification->save();
 
-        return response()->json([
-            'success' => true,
-        ]);
+        return redirect()->route('identify.show', $id);
     }
 }

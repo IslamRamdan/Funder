@@ -8,6 +8,13 @@ use Illuminate\Http\Request;
 class CategoryController extends Controller
 {
     // all categories
+    public function show()
+    {
+        $categories = Category::get();
+        return view('Categories.Categories', ['categories' => $categories]);
+    }
+
+    // all categories
     public function all()
     {
         $categories = Category::get();
@@ -35,6 +42,12 @@ class CategoryController extends Controller
         ]);
     }
 
+    // category form
+    public function form()
+    {
+        return view('Categories.create-category');
+    }
+
     // add category
     public function add(Request $request)
     {
@@ -42,13 +55,22 @@ class CategoryController extends Controller
             'name' => 'required',
         ]);
 
+        $category_old = Category::where('name', $request->name)->first();
+        if (!empty($category_old)) {
+            return redirect()->route('categories.form')->with('error', 'category already existed');
+        }
+
         $category = new Category();
         $category->name = $request->name;
         $category->save();
-        return response()->json([
-            'success' => true,
-            'message' => 'category saved successfully'
-        ]);
+        return redirect()->route('categories.show');
+    }
+
+    // category form
+    public function formUpdate($id)
+    {
+        $category = Category::find($id);
+        return view('Categories.edit-category', ['category' => $category]);
     }
 
     // add category
@@ -57,6 +79,11 @@ class CategoryController extends Controller
         $request->validate([
             'name' => 'required',
         ]);
+
+        $category_old = Category::where('name', $request->name)->first();
+        if (!empty($category_old)) {
+            return redirect()->route('categories.formUpdate', $id)->with('error', 'category already existed');
+        }
 
         $category = Category::find($id);
         if (!$category) {
@@ -67,10 +94,7 @@ class CategoryController extends Controller
 
         $category->name = $request->name;
         $category->save();
-        return response()->json([
-            'success' => true,
-            'message' => 'category updated successfully'
-        ]);
+        return redirect()->route('categories.show');
     }
 
     // delete a category
@@ -85,9 +109,6 @@ class CategoryController extends Controller
         }
 
         $category->delete();
-        return response()->json([
-            'success' => true,
-            'message' => 'category deleted successfully'
-        ]);
+        return redirect()->route('categories.show');
     }
 }

@@ -10,6 +10,18 @@ use Illuminate\Support\Str;
 
 class ReceipysController extends Controller
 {
+    public function index()
+    {
+        $receipts = Receipt::orderByRaw("status = 'pending' DESC")->get();
+        return view('Requests.Receipts.receipts', ['receipts' => $receipts]);
+    }
+
+    public function show($id)
+    {
+        $receipt = Receipt::find($id);
+        return view('Requests.Receipts.read-more', ['receipt' => $receipt]);
+    }
+
     // get receipt by id
     public function receiptById($id)
     {
@@ -40,6 +52,11 @@ class ReceipysController extends Controller
         ]);
 
         $user = auth()->user();
+        if ($user->phone == null) {
+            return response()->json([
+                'error' => 'phone number is required',
+            ], 400);
+        }
         $property = Property::find($request->property_id);
         if (!$property) {
             return response()->json([
@@ -143,15 +160,11 @@ class ReceipysController extends Controller
         $property = $receipt->property;
 
         if ($property->funders->count() == $property->funder_count + $property->funder_count * 1 / 5) {
-            return response()->json([
-                'error' => 'The number of participants in this property has been completed',
-            ], 400);
+            return redirect()->route('receipts.show', $id)->with('error', 'The number of participants in this property has been completed');
         }
 
         if ($property->funders->count() + $receipt->count_sheres > $property->funder_count + $property->funder_count * 1 / 5) {
-            return response()->json([
-                'error' => 'The purchase could not be completed because the number of available funders is ' . $property->funder_count  + $property->funder_count * 1 / 5 - $property->funders->count(),
-            ], 400);
+            return redirect()->route('receipts.show', $id)->with('error', 'The purchase could not be completed because the number of available funders is ' . $property->funder_count  + $property->funder_count * 1 / 5 - $property->funders->count());
         }
 
         $fundercount = $property->funders->where('status', 'funder')->count();
@@ -177,9 +190,7 @@ class ReceipysController extends Controller
         $receipt->status = 'accepted';
         $receipt->save();
 
-        return response()->json([
-            'success' => true,
-        ]);
+        return redirect()->route('receipts.show', $id);
     }
 
     // reject receipt
@@ -195,8 +206,6 @@ class ReceipysController extends Controller
         $receipt->status = 'rejected';
         $receipt->save();
 
-        return response()->json([
-            'success' => true,
-        ]);
+        return redirect()->route('receipts.show', $id);
     }
 }

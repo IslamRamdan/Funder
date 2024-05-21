@@ -8,6 +8,14 @@ use Illuminate\Http\Request;
 class TermsController extends Controller
 {
     // all terms
+    public function index()
+    {
+        $terms = Terms::get();
+
+        return view('Terms.terms', ["terms" => $terms]);
+    }
+
+    // all terms
     public function terms()
     {
         $terms = Terms::get();
@@ -18,6 +26,11 @@ class TermsController extends Controller
         ]);
     }
 
+
+    public function create()
+    {
+        return view('Terms.create-term');
+    }
     // add terms 
     public function addTerm(Request $request)
     {
@@ -26,17 +39,25 @@ class TermsController extends Controller
             'description' => 'required',
         ]);
 
+        $term_old = Terms::where('title', $request->title)->first();
+
+        if (!empty($term_old)) {
+            return redirect()->route('term.create')->with('error', 'the term already exists');
+        }
+
         $term = new Terms();
         $term->title = $request->title;
         $term->description = $request->description;
         $term->save();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'term added successfully'
-        ]);
+        return redirect()->route('term.index');
     }
 
+    public function show($id)
+    {
+        $term = Terms::find($id);
+        return view('Terms.edit-term', ['term' => $term]);
+    }
     // update terms 
     public function updateTerm(Request $request, $id)
     {
@@ -44,6 +65,12 @@ class TermsController extends Controller
             'title' => 'required',
             'description' => 'required',
         ]);
+
+        $term_old = Terms::where('title', $request->title)->first();
+
+        if (!empty($term_old)) {
+            return redirect()->route('term.show', $id)->with('error', 'the term already exists');
+        }
 
         $term = Terms::find($id);
         if (!$term) {
@@ -55,10 +82,7 @@ class TermsController extends Controller
         $term->description = $request->description;
         $term->save();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'term updated successfully'
-        ]);
+        return redirect()->route('term.index');
     }
 
     // delete term
@@ -72,9 +96,6 @@ class TermsController extends Controller
         }
 
         $term->delete();
-        return response()->json([
-            'success' => true,
-            'message' => 'term deleted successfully'
-        ]);
+        return redirect()->route('term.index');
     }
 }

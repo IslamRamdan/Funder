@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Funder;
 use App\Models\Location;
 use App\Models\Property;
 use Illuminate\Http\Request;
@@ -11,6 +12,28 @@ use Illuminate\Support\Str;
 
 class PropertyController extends Controller
 {
+    public function index()
+    {
+        $properties = Property::all();
+        return view('Properties.properties', ['properties' => $properties]);
+    }
+    public function soldout()
+    {
+        $properties = Property::where(['status' => 'sold out', 'approved' => null])->get();;
+        return view('Properties.properties', ['properties' => $properties]);
+    }
+
+    public function available()
+    {
+        $properties = Property::where('status', null)->get();
+        return view('Properties.properties', ['properties' => $properties]);
+    }
+    public function readMore($id)
+    {
+        $property = Property::find($id);
+        return view('Properties.readmore', ['property' => $property]);
+    }
+
     // all properties
     public function all()
     {
@@ -32,6 +55,19 @@ class PropertyController extends Controller
             ], 400);
         }
 
+
+        $property->funders = $property->funders;
+        $property->timelines = $property->timelines;
+        $property->location = $property->location;
+        $user = auth()->user();
+
+        $user_shared = Funder::where(['property_id' => $property->id, 'user_id' => $user->id])->get();
+        if (count($user_shared) > 0) {
+            $property->if_user_shared = true;
+        } else {
+            $property->if_user_shared = false;
+        }
+
         $count_sheres = $property->receipts()->count();
 
         if ($count_sheres == $property->funder_count + $property->funder_count * 1 / 5) {
@@ -44,7 +80,7 @@ class PropertyController extends Controller
 
         return response()->json([
             'success' => true,
-            'properties' => $property
+            'properties' => $property,
         ]);
     }
 
@@ -81,6 +117,10 @@ class PropertyController extends Controller
             'property_price_total' => 'required',
             'transaction_costs' => 'required',
             'service_charge' => 'required',
+            'discount' => 'required',
+            'estimated_annualised_return' => 'required',
+            'estimated_annual_appreciation' => 'required',
+            'estimated_projected_gross_yield' => 'required',
             'latitude' => 'required',
             'longitude' => 'required',
             'category_id' => 'required',
@@ -104,7 +144,11 @@ class PropertyController extends Controller
         $property->current_rent = $request->current_rent;
         $property->percent = $request->percent;
         $property->location_string = $request->location_string;
-        $property->property_price_total = $request->property_price_total;
+        $property->property_price_total = $request->property_price_total - intval($request->discount) / 100;
+        $property->discount = $request->discount;
+        $property->estimated_annualised_return = $request->estimated_annualised_return;
+        $property->estimated_annual_appreciation = $request->estimated_annual_appreciation;
+        $property->estimated_projected_gross_yield = $request->estimated_projected_gross_yield;
         $property->transaction_costs = $request->transaction_costs;
         $property->service_charge = $request->service_charge;
         $property->category_id = $request->category_id;
@@ -244,17 +288,12 @@ class PropertyController extends Controller
         $query = Property::query();
 
         $query->where('status', null);
-        $query->where('name', $request->search);
+        // $query->where('name', $request->search);
+        $query->where('name', 'like', '%' . $request->search . '%');
 
         if (isset($request->location) && $request->location != null) {
             $query->where('location_string', $request->location);
         }
-        // if (isset($request->min) && $request->min != null) {
-        //     $query->where('property_price_total', '>=', $request->min);
-        // }
-        // if (isset($request->max) && $request->max != null) {
-        //     $query->where('property_price_total', '<=', $request->max);
-        // }
         if (isset($request->category) && $request->category != null) {
             $query->whereHas('category', function ($q) use ($request) {
                 $q->whereIn('id', $request->category);
@@ -267,5 +306,50 @@ class PropertyController extends Controller
             'success' => true,
             'properties' => $properties
         ]);
+    }
+
+    // get all locations
+    public function locations()
+    {
+        $locations = Property::distinct()->pluck('location_string');
+        return response()->json([
+            'success' => true,
+            'locations' => $locations
+        ]);
+    }
+
+    public function gosoldout($id)
+    {
+        $property = Property::find($id);
+        $property->status = "sold out";
+        $property->save();
+
+        return redirect()->route('property.readMore', $id);
+    }
+
+    public function shares($id)
+    {
+        $property = Property::find($id);
+        $shares = $property->funders;
+
+        return view('Properties.shares', ['shares' => $shares, 'property' => $property]);
+    }
+
+    public function sharedelete($id)
+    {
+        $share = Funder::find($id);
+        $share->delete();
+
+        $property = $share->Property;
+        $funders = Funder::where(['property_id' => $property->id, 'status' => 'funder'])->get();
+        $pending = Funder::where(['property_id' => $property->id, 'status' => 'pending'])->orderBy('created_at', 'asc')->get();
+
+        if (count($funders) < $property->funder_count) {
+            $pending[0]->status = 'funder';
+            $pending[0]->save();
+            $property->status = null;
+            $property->save();
+        }
+        return redirect()->route('property.shares', $share->property->id);
     }
 }

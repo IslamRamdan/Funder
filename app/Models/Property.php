@@ -25,7 +25,11 @@ class Property extends Model
         'transaction_costs',
         'service_charge',
         'approved',
-        'category_id'
+        'category_id',
+        'estimated_annualised_return',
+        'estimated_annual_appreciation',
+        'estimated_projected_gross_yield',
+        'discount'
     ];
     protected $casts = [
         'images' =>  'array',
@@ -53,5 +57,9 @@ class Property extends Model
     public function funders()
     {
         return $this->hasMany(Funder::class);
+    }
+        public function sales()
+    {
+        return $this->hasMany(Sale::class);
     }
 }
