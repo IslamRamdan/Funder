@@ -17,6 +17,13 @@ class PropertyController extends Controller
         $properties = Property::all();
         return view('Properties.properties', ['properties' => $properties]);
     }
+
+    public function show()
+    {
+        $categories = Category::all();
+        return view('Properties.create', ['categories' => $categories]);
+    }
+
     public function soldout()
     {
         $properties = Property::where(['status' => 'sold out', 'approved' => null])->get();;
@@ -28,6 +35,7 @@ class PropertyController extends Controller
         $properties = Property::where('status', null)->get();
         return view('Properties.properties', ['properties' => $properties]);
     }
+
     public function readMore($id)
     {
         $property = Property::find($id);
@@ -115,7 +123,6 @@ class PropertyController extends Controller
             'percent' => 'required',
             'location_string' => 'required',
             'property_price_total' => 'required',
-            'transaction_costs' => 'required',
             'service_charge' => 'required',
             'discount' => 'required',
             'estimated_annualised_return' => 'required',
@@ -125,13 +132,6 @@ class PropertyController extends Controller
             'longitude' => 'required',
             'category_id' => 'required',
         ]);
-
-        $category = Category::find($request->category_id);
-        if (!$category) {
-            return response()->json([
-                'message' => 'Category not found',
-            ], 400);
-        }
 
         $property = new Property();
 
@@ -149,7 +149,6 @@ class PropertyController extends Controller
         $property->estimated_annualised_return = $request->estimated_annualised_return;
         $property->estimated_annual_appreciation = $request->estimated_annual_appreciation;
         $property->estimated_projected_gross_yield = $request->estimated_projected_gross_yield;
-        $property->transaction_costs = $request->transaction_costs;
         $property->service_charge = $request->service_charge;
         $property->category_id = $request->category_id;
         $property->property_price = intval($request->property_price_total / $request->funder_count);
@@ -164,10 +163,6 @@ class PropertyController extends Controller
 
             $property->images = $imagesName;
             $property->save();
-        } else {
-            return response()->json([
-                'error' => 'image not found',
-            ], 400);
         }
 
         $location = Location::create([
@@ -177,10 +172,7 @@ class PropertyController extends Controller
         ]);
         $property->location()->save($location);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'property created successfully',
-        ]);
+        return redirect()->route('property.readMore', $property->id);
     }
 
     // update property
@@ -272,10 +264,7 @@ class PropertyController extends Controller
         }
 
         $property->delete();
-        return response()->json([
-            'success' => true,
-            'message' => 'property deleted successfully'
-        ]);
+        return redirect()->route('property.index');
     }
 
     // filter properties

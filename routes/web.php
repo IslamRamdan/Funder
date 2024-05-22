@@ -66,6 +66,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/properties/available', [PropertyController::class, 'available'])->name('property.available');
     Route::get('/properties/soldout/{id}', [PropertyController::class, 'gosoldout'])->name('property.gosoldout');
     Route::get('/properties/{id}', [PropertyController::class, 'readMore'])->name('property.readMore');
+    Route::get('/create-property', [PropertyController::class, 'show'])->name('property.show');
+    Route::post('/properties', [PropertyController::class, 'create'])->name('property.create');
+    Route::delete('/properties/{id}', [PropertyController::class, 'delete'])->name('property.delete');
     Route::get('/properties/shares/{id}', [PropertyController::class, 'shares'])->name('property.shares');
     Route::get('/properties/shares/delete/{id}', [PropertyController::class, 'sharedelete'])->name('property.shares.delete');
 

@@ -29,7 +29,6 @@ return new class extends Migration
             $table->string('estimated_annualised_return');
             $table->string('estimated_annual_appreciation');
             $table->string('estimated_projected_gross_yield');
-            $table->integer('transaction_costs');
             $table->integer('service_charge');
             $table->string('status')->nullable();
             $table->timestamp('approved')->nullable();

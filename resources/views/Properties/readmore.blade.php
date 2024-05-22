@@ -1,13 +1,20 @@
 @extends ('layout')
 @section('content')
     <h1>Property name {{ $property->name }}</h1>
-    <form action="{{ url()->previous() }}" class="d-flex justify-content-around my-3" method="GET">
-        <button type="submit" class="btn btn-primary btn-sm">Go Back</button>
+    <div class="d-flex justify-content-around my-3">
+        <form action="{{ url()->previous() }}" class="" method="GET">
+            <button type="submit" class="btn btn-primary btn-sm">Go Back</button>
+        </form>
         @if ($property->status != 'sold out')
             <a href="{{ route('property.gosoldout', $property->id) }}" class="btn btn-primary btn-sm">sold out</a>
         @endif
         <a href="{{ route('property.shares', $property->id) }}" class="btn btn-primary btn-sm">shares</a>
-    </form>
+        <form action="{{ route('property.delete', $property->id) }}" method="POST">
+            @csrf
+            @method('DELETE')
+            <input class="btn btn-danger btn-sm" type="submit" value="delete">
+        </form>
+    </div>
     <div class="slideshow-container border border-black">
         @foreach ($property->images as $key => $image)
             <div class="mySlides faded">

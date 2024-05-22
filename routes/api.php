@@ -57,8 +57,6 @@ Route::get('/facebook/callback', [SocialiteController::class, 'handleFacebookCal
 // user profile
 Route::post('/profile', [AuthUsersController::class, 'profile'])->middleware('auth:sanctum');
 
-
-
 // identification user
 // add identification
 Route::post('/user/identification', [IdentificationController::class, 'addIdentification']);

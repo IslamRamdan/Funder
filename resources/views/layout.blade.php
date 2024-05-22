@@ -74,7 +74,7 @@
                             <a href="{{ route('property.index') }}" class="sidebar-link">Properties</a>
                         </li>
                         <li class="sidebar-item">
-                            <a href="{{ route('categories.form') }}" class="sidebar-link">Create Property</a>
+                            <a href="{{ route('property.show') }}" class="sidebar-link">Create Property</a>
                         </li>
                     </ul>
                 </li>
