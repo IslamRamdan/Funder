@@ -24,34 +24,36 @@ class TimelineController extends Controller
         ]);
     }
 
+    public function index($id)
+    {
+        return view('Properties.create-timeline', ['id' => $id]);
+    }
+
     // create Timelines 
-    public function create(Request $request)
+    public function create(Request $request, $id)
     {
         $request->validate([
             'date' => 'required',
             'title' => 'required',
             'description' => 'required',
-            'property_id' => 'required',
         ]);
 
-        $property = Property::find($request->property_id);
-        if (!$property) {
-            return response()->json([
-                'message' => 'property not found',
-            ], 400);
-        }
+        $property = Property::find($id);
 
         $timeline = new Timeline();
         $timeline->date = $request->date;
         $timeline->title = $request->title;
         $timeline->description = $request->description;
-        $timeline->property_id = $request->property_id;
+        $timeline->property_id = $property->id;
         $timeline->save();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'timeline created successfully'
-        ]);
+        return redirect()->route('property.readMore', $timeline->property_id);
+    }
+
+    public function show($id)
+    {
+        $timeline = Timeline::find($id);
+        return view('Properties.edit-timeline', ['timeline' => $timeline]);
     }
 
     // update Timelines 
@@ -75,27 +77,14 @@ class TimelineController extends Controller
         $timeline->description = $request->description;
         $timeline->save();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'timeline updated successfully'
-        ]);
+        return redirect()->route('property.readMore', $timeline->property->id);
     }
 
     // delete Timelines 
     public function delete($id)
     {
         $timeline = Timeline::find($id);
-        if (!$timeline) {
-            return response()->json([
-                'error' => 'timeline not found',
-            ], 400);
-        }
-
         $timeline->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'timeline deleted successfully'
-        ]);
+        return redirect()->back();
     }
 }

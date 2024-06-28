@@ -8,6 +8,25 @@ use Illuminate\Http\Request;
 class PaymentController extends Controller
 {
     //
+    public function index()
+    {
+        $payments = Payment::all();
+
+        return view('Payments.payment', ['payments' => $payments]);
+    }
+
+    public function add()
+    {
+        return view('Payments.create');
+    }
+
+    public function edit($id)
+    {
+        $payment = Payment::find($id);
+
+        return view('Payments.edit', ['payment' => $payment]);
+    }
+
     public function all()
     {
         $payments = Payment::all();
@@ -32,10 +51,7 @@ class PaymentController extends Controller
         $payment->bank = $request->bank;
         $payment->account_number = $request->account_number;
         $payment->save();
-        return response()->json([
-            'success' => true,
-            'message' => 'payment created successfully'
-        ]);
+        return redirect()->route('payment.index');
     }
 
     public function update(Request $request, $id)
@@ -53,19 +69,14 @@ class PaymentController extends Controller
         $payment->bank = $request->bank;
         $payment->account_number = $request->account_number;
         $payment->save();
-        return response()->json([
-            'success' => true,
-            'message' => 'payment updated successfully'
-        ]);
+        return redirect()->route('payment.index');
     }
-    public function delete( $id)
+
+    public function delete($id)
     {
         $payment = Payment::find($id);
         $payment->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'payment deleted successfully'
-        ]);
+        return redirect()->route('payment.index');
     }
 }

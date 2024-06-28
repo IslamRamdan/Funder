@@ -74,6 +74,8 @@ Route::get('/category/{id}', [CategoryController::class, 'cateById']);
 
 // Property
 Route::get('/properties', [PropertyController::class, 'all']);
+// Property sold out
+Route::get('/properties/sold-out', [PropertyController::class, 'propertiesSoldout']);
 // Property by id
 Route::get('/properties/{id}', [PropertyController::class, 'propById'])->middleware('auth:sanctum');
 // get all properties by category name
@@ -112,12 +114,6 @@ Route::delete('/favorites', [FavoriteController::class, 'clearAll'])->middleware
 // payment methods
 // get all payments
 Route::get('/payment', [PaymentController::class, 'all']);
-// create a new payment
-Route::post('/payment', [PaymentController::class, 'create']);
-// update payment
-Route::post('/payment/{id}', [PaymentController::class, 'update']);
-// delete payment
-Route::delete('/payment/{id}', [PaymentController::class, 'delete']);
 
 
 // get receipts by user

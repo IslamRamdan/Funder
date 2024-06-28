@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Funder;
 use App\Models\Location;
 use App\Models\Property;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -46,6 +47,16 @@ class PropertyController extends Controller
     public function all()
     {
         $properties = Property::all();
+
+        return response()->json([
+            'success' => true,
+            'properties' => $properties
+        ]);
+    }
+    // properties soldout
+    public function propertiesSoldout()
+    {
+        $properties = Property::where('status', 'sold out')->get();
 
         return response()->json([
             'success' => true,
@@ -113,7 +124,7 @@ class PropertyController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'images' => 'required',
+            'images' => 'required||max:5',
             'description' => 'required',
             'funded_date' => 'required|date',
             'purchase_price' => 'required',
@@ -340,5 +351,21 @@ class PropertyController extends Controller
             $property->save();
         }
         return redirect()->route('property.shares', $share->property->id);
+    }
+
+    public function property_shared_user($id)
+    {
+        $user = User::find($id);
+        $funders = $user->funders;
+
+        $properties = [];
+        foreach ($funders as $funder) {
+            $property = $funder->property;
+            array_push($properties, $property);
+        }
+        $allProperty = array_unique($properties);
+        $arr = [...$allProperty];
+
+        return view('Users.property-shered-user', ['properties' => $arr, 'user' => $user]);
     }
 }

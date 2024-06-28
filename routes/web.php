@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\ReceipysController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\TermsController;
+use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\user\AuthUsersController;
 use App\Http\Controllers\user\IdentificationController;
 use Illuminate\Support\Facades\Route;
@@ -38,6 +40,7 @@ Route::middleware('auth')->group(function () {
 require __DIR__ . '/auth.php';
 
 Route::middleware('auth')->group(function () {
+    Route::post('/user/image/{id}', [AuthUsersController::class, 'image'])->name('user.image');
 
     Route::get('/categories', [CategoryController::class, 'show'])->name('categories.show');
     Route::get('/create-category', [CategoryController::class, 'form'])->name('categories.form');
@@ -71,6 +74,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/properties/{id}', [PropertyController::class, 'delete'])->name('property.delete');
     Route::get('/properties/shares/{id}', [PropertyController::class, 'shares'])->name('property.shares');
     Route::get('/properties/shares/delete/{id}', [PropertyController::class, 'sharedelete'])->name('property.shares.delete');
+    Route::get('/properties/user-shered/{id}', [PropertyController::class, 'property_shared_user'])->name('property.user.shered');
+
+    Route::get('/timeline/{id}', [TimelineController::class, 'index'])->name('timeline.index');
+    Route::post('/timeline/{id}', [TimelineController::class, 'create'])->name('timeline.create');
+    Route::get('/timeline/delete/{id}', [TimelineController::class, 'delete'])->name('timeline.delete');
+    Route::get('/timeline/edit/{id}', [TimelineController::class, 'show'])->name('timeline.edit');
+    Route::post('/timeline/edit/{id}', [TimelineController::class, 'update'])->name('timeline.update');
 
 
     Route::get('/receipts', [ReceipysController::class, 'index'])->name('receipts.index');
@@ -96,4 +106,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/sales', [SaleController::class, 'index'])->name('sale.index');
     Route::get('/sales/accepted/{id}', [SaleController::class, 'accepted'])->name('sale.accepted');
     Route::get('/sales/rejected/{id}', [SaleController::class, 'rejected'])->name('sale.rejected');
+
+
+    Route::get('/payment', [PaymentController::class, 'index'])->name('payment.index');
+    Route::get('/payment/create', [PaymentController::class, 'add'])->name('payment.add');
+    Route::post('/payment', [PaymentController::class, 'create'])->name('payment.create');
+    Route::get('/payment/edit/{id}', [PaymentController::class, 'edit'])->name('payment.edit');
+    Route::post('/payment/{id}', [PaymentController::class, 'update'])->name('payment.update');
+    Route::get('/payment/delete/{id}', [PaymentController::class, 'delete'])->name('payment.delete');
 });

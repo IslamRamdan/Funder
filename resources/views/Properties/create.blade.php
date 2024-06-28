@@ -219,7 +219,7 @@
                 </div>
             @enderror
 
-            <input type="submit" value="save">
+            <input type="submit" value="save" class="btn btn-primary btn-sm">
         </form>
     </div>
 @endsection

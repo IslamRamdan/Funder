@@ -2,9 +2,7 @@
 @section('content')
     <h1>Property name {{ $property->name }}</h1>
     <div class="d-flex justify-content-around my-3">
-        <form action="{{ url()->previous() }}" class="" method="GET">
-            <button type="submit" class="btn btn-primary btn-sm">Go Back</button>
-        </form>
+        <a class="btn btn-primary btn-sm" href="{{ route('timeline.index', $property->id) }}">create timeline</a>
         @if ($property->status != 'sold out')
             <a href="{{ route('property.gosoldout', $property->id) }}" class="btn btn-primary btn-sm">sold out</a>
         @endif
@@ -54,10 +52,14 @@
         <div class="timeline">
             <h3 class="mb-5">timelines</h3>
             @foreach ($property->timelines as $timeline)
-                <div class="">
+                <div class="mt-3">
                     <h3>{{ $timeline->date }}</h3>
                     <h1>{{ $timeline->title }}</h1>
                     <p>{{ $timeline->description }}</p>
+                    <div class="d-flex justify-content-around">
+                        <a href="{{ route('timeline.delete', $timeline->id) }}" class="btn btn-danger btn-sm">delete</a>
+                        <a href="{{ route('timeline.edit', $timeline->id) }}" class="btn btn-primary btn-sm">edit</a>
+                    </div>
                 </div>
             @endforeach
         </div>

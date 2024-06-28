@@ -263,4 +263,17 @@ class AuthUsersController extends Controller
         $user = User::find($id);
         return view('Users.read-more', ['user' => $user]);
     }
+    public function image(Request $request, $id)
+    {
+        $request->validate([
+            'image' => 'required'
+        ]);
+
+        $user = User::find($id);
+        $filename = Str::random(32) . "." . $request->image->getClientOriginalExtension();
+        $request->image->move('uploads/', $filename);
+        $user->image = $filename;
+        $user->save();
+        return redirect()->route('profile.edit');
+    }
 }
