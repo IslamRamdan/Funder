@@ -1,12 +1,13 @@
 @extends ('layout')
 @section('content')
     <h1>Property name {{ $property->name }}</h1>
-    <div class="d-flex justify-content-around my-3">
+    <div class="d-flex justify-content-around my-3 flex-wrap gap-3">
         <a class="btn btn-primary btn-sm" href="{{ route('timeline.index', $property->id) }}">create timeline</a>
         @if ($property->status != 'sold out')
             <a href="{{ route('property.gosoldout', $property->id) }}" class="btn btn-primary btn-sm">sold out</a>
         @endif
         <a href="{{ route('property.shares', $property->id) }}" class="btn btn-primary btn-sm">shares</a>
+        <a href="{{ route('property.edit', $property->id) }}" class="btn btn-primary btn-sm">edit</a>
         <form action="{{ route('property.delete', $property->id) }}" method="POST">
             @csrf
             @method('DELETE')
@@ -17,6 +18,11 @@
         @foreach ($property->images as $key => $image)
             <div class="mySlides faded">
                 <div class="numbertext">{{ $key + 1 }} / {{ count($property->images) }}</div>
+                @if (count($property->images) > 1)
+                    <a class="btn btn-danger btn-sm" style="position: absolute; right: 10px; top: 10px;"
+                        href="{{ route('property.image.delete', ['id' => $property->id, 'imagename' => $image]) }}">delete
+                        image</a>
+                @endif
                 <img src="{{ url('uploads/' . $image) }}" style="width:100%">
             </div>
         @endforeach

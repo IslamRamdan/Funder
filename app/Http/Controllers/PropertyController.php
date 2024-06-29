@@ -186,15 +186,21 @@ class PropertyController extends Controller
         return redirect()->route('property.readMore', $property->id);
     }
 
+
+    public function edit($id)
+    {
+        $property = Property::find($id);
+        $categories = Category::all();
+        return view('Properties.edit-property', ['property' => $property, 'categories' => $categories]);
+    }
     // update property
     public function update(Request $request, $id)
     {
         $request->validate([
             'name' => 'required',
-            'images' => 'nullable',
-            'img_delete' => 'nullable',
+            'images' => 'nullable||max:5',
             'description' => 'required',
-            'funded_date' => 'required',
+            'funded_date' => 'required|date',
             'purchase_price' => 'required',
             'funder_count' => 'required',
             'rental_income' => 'required',
@@ -202,10 +208,14 @@ class PropertyController extends Controller
             'percent' => 'required',
             'location_string' => 'required',
             'property_price_total' => 'required',
-            'transaction_costs' => 'required',
             'service_charge' => 'required',
+            'discount' => 'required',
+            'estimated_annualised_return' => 'required',
+            'estimated_annual_appreciation' => 'required',
+            'estimated_projected_gross_yield' => 'required',
             'latitude' => 'required',
             'longitude' => 'required',
+            'category_id' => 'required',
         ]);
 
         $property = Property::find($id);
@@ -224,11 +234,14 @@ class PropertyController extends Controller
         $property->current_rent = $request->current_rent;
         $property->percent = $request->percent;
         $property->location_string = $request->location_string;
-        $property->property_price_total = $request->property_price_total;
-        $property->transaction_costs = $request->transaction_costs;
+        $property->property_price_total = $request->property_price_total - intval($request->discount) / 100;
+        $property->discount = $request->discount;
+        $property->estimated_annualised_return = $request->estimated_annualised_return;
+        $property->estimated_annual_appreciation = $request->estimated_annual_appreciation;
+        $property->estimated_projected_gross_yield = $request->estimated_projected_gross_yield;
         $property->service_charge = $request->service_charge;
-
-        $property->property_price = $property->property_price_total / $property->funder_count;
+        $property->category_id = $request->category_id;
+        $property->property_price = intval($request->property_price_total / $request->funder_count);
 
         $property->location()->update([
             'latitude' => $request->latitude,
@@ -244,24 +257,10 @@ class PropertyController extends Controller
             }
         }
 
-        if ($request->has('img_delete')) {
-            foreach ($request->delete_image as $image) {
-                if (in_array($image, $imagesA)) {
-                    $index = array_search($image, $imagesA);
-                    if ($index !== false) {
-                        unset($imagesA[$index]);
-                    }
-                }
-            }
-        }
-
         $property->images = [...$imagesA];
 
         $property->save();
-        return response()->json([
-            'success' => true,
-            'message' => 'property updated successfully',
-        ]);
+        return redirect()->route('property.readMore', $id);
     }
 
     // delete property
@@ -367,5 +366,23 @@ class PropertyController extends Controller
         $arr = [...$allProperty];
 
         return view('Users.property-shered-user', ['properties' => $arr, 'user' => $user]);
+    }
+
+    public function deleteImage($property_id, $imageName)
+    {
+
+        $property = Property::find($property_id);
+        $imagesA = $property->images;
+
+        if (in_array($imageName, $imagesA)) {
+            $index = array_search($imageName, $imagesA);
+            if ($index !== false) {
+                unset($imagesA[$index]);
+                $property->images = [...$imagesA];
+                $property->save();
+            }
+        }
+
+        return redirect()->back();
     }
 }

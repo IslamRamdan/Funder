@@ -75,6 +75,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/properties/shares/{id}', [PropertyController::class, 'shares'])->name('property.shares');
     Route::get('/properties/shares/delete/{id}', [PropertyController::class, 'sharedelete'])->name('property.shares.delete');
     Route::get('/properties/user-shered/{id}', [PropertyController::class, 'property_shared_user'])->name('property.user.shered');
+    Route::get('/properties/edit/{property_id}', [PropertyController::class, 'edit'])->name('property.edit');
+    Route::post('/properties/update/{property_id}', [PropertyController::class, 'update'])->name('property.update');
+    Route::get('/properties/{id}/{imagename}', [PropertyController::class, 'deleteImage'])->name('property.image.delete');
 
     Route::get('/timeline/{id}', [TimelineController::class, 'index'])->name('timeline.index');
     Route::post('/timeline/{id}', [TimelineController::class, 'create'])->name('timeline.create');
