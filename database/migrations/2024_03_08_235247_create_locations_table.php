@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('locations', function (Blueprint $table) {
             $table->id();
-            $table->double('latitude', 10, 6);
-            $table->double('longitude', 10, 6);
+            $table->double('latitude');
+            $table->double('longitude');
             $table->foreignId("property_id")->constrained("properties")->cascadeOnDelete();
             $table->timestamps();
         });

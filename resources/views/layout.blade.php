@@ -26,7 +26,7 @@
             </div>
             <ul class="sidebar-nav">
                 <li class="sidebar-item">
-                    <a href="/profile" class="sidebar-link">
+                    <a href="{{ route('profile.edit') }}" class="sidebar-link">
                         <i class="fa-solid fa-user"></i>
                         <span>Profile</span>
                     </a>
@@ -99,7 +99,8 @@
                             <i style="color: red;" class="fa-solid fa-bell"></i>
                             <span style="color: red;">Requests</span>
                         @else
-                            <a href="{{ route('receipts.index') }}" class="sidebar-link">Receipts</a>
+                            <i class="fa-solid fa-bell"></i>
+                            <span>Requests</span>
                         @endif
                     </a>
                     <ul id="Requests" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">

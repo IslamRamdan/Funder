@@ -186,7 +186,7 @@
 
             <div class="input-group flex-nowrap mt-3">
                 <span class="input-group-text" id="addon-wrapping">Latitude</span>
-                <input type="number" class="form-control" required step="0.001" name='latitude'
+                <input type="number" class="form-control" required name='latitude' step='any'
                     placeholder="latitude" aria-label="Username" aria-describedby="addon-wrapping"
                     value="{{ $property->location->latitude }}">
             </div>
@@ -198,7 +198,7 @@
 
             <div class="input-group flex-nowrap mt-3">
                 <span class="input-group-text" id="addon-wrapping">Longitude</span>
-                <input type="number" class="form-control" required step="0.001" name='longitude'
+                <input type="number" class="form-control" required name='longitude' step='any'
                     placeholder="longitude" aria-label="Username" aria-describedby="addon-wrapping"
                     value="{{ $property->location->longitude }}">
             </div>

@@ -185,7 +185,7 @@
 
             <div class="input-group flex-nowrap mt-3">
                 <span class="input-group-text" id="addon-wrapping">Latitude</span>
-                <input type="number" class="form-control" required step="0.001" name='latitude'
+                <input type="number" class="form-control" required step="any" name='latitude'
                     placeholder="latitude" aria-label="Username" aria-describedby="addon-wrapping">
             </div>
             @error('latitude')
@@ -196,7 +196,7 @@
 
             <div class="input-group flex-nowrap mt-3">
                 <span class="input-group-text" id="addon-wrapping">Longitude</span>
-                <input type="number" class="form-control" required step="0.001" name='longitude'
+                <input type="number" class="form-control" required step="any" name='longitude'
                     placeholder="longitude" aria-label="Username" aria-describedby="addon-wrapping">
             </div>
             @error('longitude')

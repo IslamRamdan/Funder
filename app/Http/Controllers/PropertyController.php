@@ -7,6 +7,7 @@ use App\Models\Funder;
 use App\Models\Location;
 use App\Models\Property;
 use App\Models\User;
+use Illuminate\Support\Facades\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -213,8 +214,8 @@ class PropertyController extends Controller
             'estimated_annualised_return' => 'required',
             'estimated_annual_appreciation' => 'required',
             'estimated_projected_gross_yield' => 'required',
-            'latitude' => 'required',
-            'longitude' => 'required',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
             'category_id' => 'required',
         ]);
 
@@ -378,6 +379,11 @@ class PropertyController extends Controller
             $index = array_search($imageName, $imagesA);
             if ($index !== false) {
                 unset($imagesA[$index]);
+                $imagePath = public_path('uploads/' . $imageName);
+
+                if (File::exists($imagePath)) {
+                    File::delete($imagePath);
+                }
                 $property->images = [...$imagesA];
                 $property->save();
             }
