@@ -90,11 +90,11 @@ class AuthUsersController extends Controller
             return response()->Json(["error" => 'username or password is incorrect']);
         }
 
-        if ($user->email_verified_at === null) {
-            return response()->json([
-                'message' => 'Please confirm your email.',
-            ], 401);
-        }
+        // if ($user->email_verified_at === null) {
+        //     return response()->json([
+        //         'error' => 'Please confirm your email.',
+        //     ], 400);
+        // }
 
         $token = $user->createToken($user->name);
         return response()->Json(
