@@ -22,8 +22,8 @@ class Property extends Model
         'location_point',
         'property_price_total',
         'property_price',
-        'transaction_costs',
         'service_charge',
+        'status',
         'approved',
         'category_id',
         'estimated_annualised_return',
@@ -44,7 +44,7 @@ class Property extends Model
     }
     public function location()
     {
-        return $this->hasOne(location::class);
+        return $this->hasOne(Location::class);
     }
     public function favorites()
     {
@@ -58,7 +58,7 @@ class Property extends Model
     {
         return $this->hasMany(Funder::class);
     }
-        public function sales()
+    public function sales()
     {
         return $this->hasMany(Sale::class);
     }

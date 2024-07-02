@@ -158,6 +158,7 @@ class PropertyController extends Controller
         $property->location_string = $request->location_string;
         $property->property_price_total = $request->property_price_total - intval($request->discount) / 100;
         $property->discount = $request->discount;
+        $property->status = 'available';
         $property->estimated_annualised_return = $request->estimated_annualised_return;
         $property->estimated_annual_appreciation = $request->estimated_annual_appreciation;
         $property->estimated_projected_gross_yield = $request->estimated_projected_gross_yield;

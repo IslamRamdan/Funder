@@ -26,12 +26,6 @@
             </div>
             <ul class="sidebar-nav">
                 <li class="sidebar-item">
-                    <a href="{{ route('profile.edit') }}" class="sidebar-link">
-                        <i class="fa-solid fa-user"></i>
-                        <span>Profile</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
                     <a href="#" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"
                         data-bs-target="#terms" aria-expanded="false" aria-controls="terms">
                         <i class="fa-solid fa-circle-check"></i> <span>Terms</span>
@@ -130,7 +124,12 @@
                         </li>
                     </ul>
                 </li>
-
+                <li class="sidebar-item">
+                    <a href="{{ route('profile.edit') }}" class="sidebar-link">
+                        <i class="fa-solid fa-user"></i>
+                        <span>Profile</span>
+                    </a>
+                </li>
                 <li class="sidebar-item">
                     <a href="{{ route('user.index') }}" class="sidebar-link">
                         <i class="fa-solid fa-people-group"></i>
