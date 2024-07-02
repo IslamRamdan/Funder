@@ -288,7 +288,7 @@ class PropertyController extends Controller
 
         $query = Property::query();
 
-        $query->where('status', null);
+        $query->where('status', 'available');
         // $query->where('name', $request->search);
         $query->where('name', 'like', '%' . $request->search . '%');
 
