@@ -37,31 +37,32 @@ class WalletController extends Controller
 
         // number of properties
         $properties =  $this->getPropOfFunders('', $user);
-        
+
         // monthly income
-        $monthly_income=0;
+        $monthly_income = 0;
         $properties_of_monthly_income =  $this->getPropOfFunders('funder', $user);
 
         foreach ($properties_of_monthly_income as $prop) {
-            if ($prop->approved != null) {
-                $count_shere = Funder::where(['status'=>'funder', 'user_id'=>$user->id, 'property_id'=> $prop->id])->count();
-
+            $rent = $prop->rents->where('status', 'active')->first();
+            $date = Carbon::parse($rent->end_date);
+            if ($date->isPast()) {
+                $count_shere = Funder::where(['status' => 'funder', 'user_id' => $user->id, 'property_id' => $prop->id])->count();
                 $monthly_income += (intval($prop->current_rent) * $count_shere);
             }
         }
 
         // annual gross yield
-        $total_percent =0;
+        $total_percent = 0;
         $length  = 0;
         foreach ($properties_of_monthly_income as $prop) {
             $total_percent += $prop->percent;
-            $length +=1;
+            $length += 1;
         }
 
         if (count($properties_of_monthly_income) != 0) {
             $annual_gross_yield = $total_percent / count($properties_of_monthly_income);
-        }else {
-            $annual_gross_yield=0;
+        } else {
+            $annual_gross_yield = 0;
         };
 
         return response()->json([
@@ -91,6 +92,10 @@ class WalletController extends Controller
             'properties' => $properties,
             'properties_panding' => $arr
         ]);
+    }
+
+    public function propertyDetails($id)
+    {
     }
 
     private function getPropOfFunders($status, $user)

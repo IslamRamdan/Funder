@@ -8,6 +8,7 @@
         @endif
         <a href="{{ route('property.shares', $property->id) }}" class="btn btn-primary btn-sm">shares</a>
         <a href="{{ route('property.edit', $property->id) }}" class="btn btn-primary btn-sm">edit</a>
+        <a href="{{ route('rent.show', $property->id) }}" class="btn btn-primary btn-sm">rents</a>
         <form action="{{ route('property.delete', $property->id) }}" method="POST">
             @csrf
             @method('DELETE')

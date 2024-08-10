@@ -42,6 +42,10 @@ class Property extends Model
     {
         return $this->hasMany(Timeline::class);
     }
+    public function rents()
+    {
+        return $this->hasMany(Rent::class);
+    }
     public function location()
     {
         return $this->hasOne(Location::class);

@@ -101,6 +101,7 @@ class PropertyController extends Controller
         return response()->json([
             'success' => true,
             'properties' => $property,
+            'count-shars' => $user_shared
         ]);
     }
 

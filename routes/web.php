@@ -5,6 +5,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\ReceipysController;
+use App\Http\Controllers\RentController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\TermsController;
 use App\Http\Controllers\TimelineController;
@@ -117,4 +118,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/payment/edit/{id}', [PaymentController::class, 'edit'])->name('payment.edit');
     Route::post('/payment/{id}', [PaymentController::class, 'update'])->name('payment.update');
     Route::get('/payment/delete/{id}', [PaymentController::class, 'delete'])->name('payment.delete');
+
+    // rent
+    // all rent 
+    Route::get('/rent/{id}', [RentController::class, 'allRentforProperty'])->name('rent.show');
+    // add rent
+    Route::get('/rent/add/{id}', [RentController::class, 'add'])->name('rent.add');
+    // create rent
+    Route::post('/rent/create/{id}', [RentController::class, 'create'])->name('rent.create');
+    Route::get('/rent/active/{id}', [RentController::class, 'active'])->name('rent.active');
+    Route::get('/rent/not-active/{id}', [RentController::class, 'notActive'])->name('rent.not-active');
 });
