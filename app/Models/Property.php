@@ -17,6 +17,7 @@ class Property extends Model
         'funder_count',
         'rental_income',
         'current_rent',
+        'current_evaluation',
         'percent',
         'location_string',
         'location_point',

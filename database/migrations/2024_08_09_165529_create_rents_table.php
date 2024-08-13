@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId("property_id")->constrained("properties")->cascadeOnDelete();
             $table->date('start_date');
+            $table->string('monthly_income');
             $table->date('end_date');
             $table->string('status');
             $table->timestamps();

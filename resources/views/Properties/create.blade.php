@@ -95,6 +95,17 @@
             @enderror
 
             <div class="input-group flex-nowrap mt-3">
+                <span class="input-group-text" id="addon-wrapping">Current Evaluation</span>
+                <input type="number" class="form-control" name='current_evaluation' required
+                    placeholder="Current Evaluation" aria-label="Username" aria-describedby="addon-wrapping">
+            </div>
+            @error('current_evaluation')
+                <div class="p-3 text-primary-emphasis bg-primary-subtle border border-primary-subtle rounded-3 mt-3">
+                    {{ $message }}
+                </div>
+            @enderror
+
+            <div class="input-group flex-nowrap mt-3">
                 <span class="input-group-text" id="addon-wrapping">Annual Gross Yield</span>
                 <input type="number" class="form-control" name='percent' required placeholder="Annual Gross Yield"
                     aria-label="Username" aria-describedby="addon-wrapping">

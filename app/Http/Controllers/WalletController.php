@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Funder;
 use App\Models\Property;
+use App\Models\Rent;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -96,6 +97,55 @@ class WalletController extends Controller
 
     public function propertyDetails($id)
     {
+        $user = auth()->user();
+        $property = Property::find($id);
+
+        $annualReturn = $property->estimated_annualised_return;
+        $shereFunder = Funder::where(['user_id' => $user->id, 'property_id' => $property->id, 'status' => 'funder'])->get();
+        $theOwnerShip = $property->funder_count / count($shereFunder) * 100 / 100;
+        $investedAmount = count($shereFunder) * $property->property_price;
+        $investmentValue = $property->current_evaluation * count($shereFunder) / 100;
+
+        $date = Carbon::now();
+        $purchase_date = Funder::where(['user_id' => $user->id, 'property_id' => $property->id])->orderBy('created_at', 'asc')->first();
+
+        $allrents = Rent::where('property_id', $property->id)->where('start_date', '<', $date)->where('start_date', '>', $purchase_date->created_at)->get();
+        $total_rent_received = 0;
+        foreach ($allrents as $rent) {
+            $total_rent_received += count($shereFunder) * $rent->monthly_income;
+        }
+
+        $the_last_payment = 0;
+        $rentActive = Rent::where(['property_id' => $property->id, 'status' => 'active'])->first();
+        $lastRent = Rent::where(['property_id' => $property->id])->orderBy('created_at', 'desc')->first();
+        if ($rentActive) {
+            $the_last_payment = $rentActive->monthly_income * count($shereFunder);
+        } elseif ($lastRent) {
+            $the_last_payment = $lastRent->monthly_income * count($shereFunder);
+        }
+
+        $current_rent = $property->current_rent * count($shereFunder);
+
+        $expected_next_payment = 'The property is not rented';
+        if ($rentActive) {
+            $start_date = Carbon::parse($rentActive->start_date);
+            $day = $start_date->day;
+            $expected_next_payment  = $date->setDay($day)->formatLocalized('%d %B %Y');
+        }
+
+        return response()->json([
+            'property' => $property,
+            'property_price' => $property->property_price,
+            'annualised_return' => $annualReturn,
+            'current_evaluation' => $property->current_evaluation,
+            'current_rent' => $current_rent,
+            'invested_amount' => $investedAmount,
+            'investment_value' => $investmentValue,
+            'my_owner_ship' => $theOwnerShip,
+            'total_rent_received' => $total_rent_received,
+            'the_last_payment' => $the_last_payment,
+            'expected_next_payment' => $expected_next_payment,
+        ]);
     }
 
     private function getPropOfFunders($status, $user)

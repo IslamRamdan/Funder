@@ -13,6 +13,7 @@ class Rent extends Model
         'start_date',
         'end_date',
         'status',
+        'monthly_income',
     ];
 
     public function property()

@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('location_string');
             $table->integer('property_price_total');
             $table->string('property_price');
+            $table->string('current_evaluation');
             $table->string('discount');
             $table->string('estimated_annualised_return');
             $table->string('estimated_annual_appreciation');

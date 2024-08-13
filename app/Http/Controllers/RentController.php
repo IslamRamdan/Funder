@@ -28,12 +28,14 @@ class RentController extends Controller
     {
         $request->validate([
             'start_date' => 'required',
+            'monthly_income' => 'required',
             'end_date' => 'required',
         ]);
 
         $rent = new Rent();
         $rent->property_id = $id;
         $rent->start_date = $request->start_date;
+        $rent->monthly_income = $request->monthly_income;
         $rent->end_date = $request->end_date;
         $rent->status = 'active';
         $rent->save();
@@ -46,7 +48,8 @@ class RentController extends Controller
     {
         $rentactive = Rent::find($id);
         $property = $rentactive->property;
-        foreach ($property->rents as $rent) {
+        $rents = Rent::where(['property_id' => $property->id])->get();
+        foreach ($rents as $rent) {
             $rent->status = 'not active';
             $rent->save();
         }

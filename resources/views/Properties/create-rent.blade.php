@@ -14,6 +14,18 @@
                             {{ $message }}
                         </div>
                     @enderror
+
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="inputGroup-sizing-default">Monthly Income</span>
+                        <input type="number" class="form-control" aria-label="Sizing example input"
+                            aria-describedby="inputGroup-sizing-default" name="monthly_income">
+                    </div>
+                    @error('monthly_income')
+                        <div class="p-3 text-primary-emphasis bg-primary-subtle border border-primary-subtle rounded-3 my-3">
+                            {{ $message }}
+                        </div>
+                    @enderror
+
                     <div class="input-group mb-3">
                         <span class="input-group-text" id="inputGroup-sizing-default">end date</span>
                         <input type="date" class="form-control" aria-label="Sizing example input"

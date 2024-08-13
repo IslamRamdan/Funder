@@ -8,6 +8,7 @@
                 <div class="card-body">
                     <blockquote class="blockquote mb-0">
                         <p>status: {{ $rent->status }}</p>
+                        <p>Monthly Income: {{ $rent->monthly_income }}</p>
                         <footer class="blockquote-footer">Start date : <cite
                                 title="Source Title">{{ $rent->start_date }}</cite>
                         </footer>

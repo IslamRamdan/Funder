@@ -137,6 +137,7 @@ class PropertyController extends Controller
             'location_string' => 'required',
             'property_price_total' => 'required',
             'service_charge' => 'required',
+            'current_evaluation' => 'required',
             'discount' => 'required',
             'estimated_annualised_return' => 'required',
             'estimated_annual_appreciation' => 'required',
@@ -150,6 +151,7 @@ class PropertyController extends Controller
 
         $property->name = $request->name;
         $property->description = $request->description;
+        $property->current_evaluation = $request->current_evaluation;
         $property->funded_date = $request->funded_date;
         $property->purchase_price = $request->purchase_price;
         $property->funder_count = $request->funder_count;
@@ -212,6 +214,7 @@ class PropertyController extends Controller
             'location_string' => 'required',
             'property_price_total' => 'required',
             'service_charge' => 'required',
+            'current_evaluation' => 'required',
             'discount' => 'required',
             'estimated_annualised_return' => 'required',
             'estimated_annual_appreciation' => 'required',
@@ -229,6 +232,7 @@ class PropertyController extends Controller
         }
 
         $property->name = $request->name;
+        $property->current_evaluation = $request->current_evaluation;
         $property->description = $request->description;
         $property->funded_date = $request->funded_date;
         $property->purchase_price = $request->purchase_price;
