@@ -99,7 +99,8 @@ class AuthUsersController extends Controller
         $token = $user->createToken($user->name);
         return response()->Json(
             [
-                "token" => $token->plainTextToken, 'user' => $user
+                "token" => $token->plainTextToken,
+                'user' => $user
             ]
         );
     }
@@ -244,6 +245,7 @@ class AuthUsersController extends Controller
 
         return response()->json([
             'success' => true,
+            'user' => $user
         ]);
     }
 
