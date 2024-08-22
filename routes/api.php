@@ -135,7 +135,7 @@ Route::post('/sales', [SaleController::class, 'create'])->middleware('auth:sanct
 // Wallet 
 Route::get('/wallet', [WalletController::class, 'wallet'])->middleware('auth:sanctum');
 // get Properties in which the user participates
-Route::get('/properties/shere', [WalletController::class, 'propOfSheres'])->middleware('auth:sanctum');
+Route::get('/properties/shere/panding', [WalletController::class, 'propOfSheres'])->middleware('auth:sanctum');
 Route::get('/properties/propertyDetails/{id}', [WalletController::class, 'propertyDetails'])->middleware('auth:sanctum');
 
 
