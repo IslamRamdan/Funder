@@ -113,6 +113,11 @@ class AuthUsersController extends Controller
         ]);
 
         $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return response()->json([
+                'error' => 'user does not exist',
+            ]);
+        }
 
         $user->notify(new EmailVerificationNotification());
 
