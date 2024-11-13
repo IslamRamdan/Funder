@@ -22,7 +22,7 @@ class WalletController extends Controller
         foreach ($receipt_not_rejected as $receipt) {
             $sheres_count = $receipt->count_sheres;
             $property = Property::find($receipt->property_id);
-            $receipt_price = $property->property_price * $sheres_count;
+            $receipt_price = $property->property_price / $property->funder_count * $sheres_count;
             $investment += $receipt_price;
         }
 
@@ -30,10 +30,10 @@ class WalletController extends Controller
         $receipt_pending = $receipts->where('status', 'pending');
         $deposit = 0;
         foreach ($receipt_pending as $receipt) {
-            $sheres_count = $receipt->count_sheres;
-            $property = Property::find($receipt->property_id);
-            $receipt_price = $property->property_price * $sheres_count;
-            $deposit += $receipt_price;
+            $sheres_count = $receipt->count_sheres * 5000;
+            // $property = Property::find($receipt->property_id);
+            // $receipt_price = $property->property_price * $sheres_count;
+            $deposit += $sheres_count;
         }
 
         // number of properties
@@ -49,7 +49,8 @@ class WalletController extends Controller
                 $date = Carbon::parse($rent->end_date);
                 if ($date->isPast()) {
                     $count_shere = Funder::where(['status' => 'funder', 'user_id' => $user->id, 'property_id' => $prop->id])->count();
-                    $monthly_income += (intval($prop->current_rent) * $count_shere);
+                    $rent_active_naw = Rent::where(['property_id' => $prop->id, 'status' => 'active'])->first();
+                    $monthly_income += ($rent_active_naw->monthly_income / $prop->funder_count * $count_shere);
                 }
             }
         }
@@ -104,36 +105,61 @@ class WalletController extends Controller
 
         $annualReturn = $property->estimated_annualised_return;
         $shereFunder = Funder::where(['user_id' => $user->id, 'property_id' => $property->id, 'status' => 'funder'])->get();
-        $theOwnerShip = $property->funder_count / count($shereFunder) * 100 / 100;
-        $investedAmount = count($shereFunder) * $property->property_price;
-        $investmentValue = $property->current_evaluation * count($shereFunder) / 100;
+        $sherePending = Funder::where(['user_id' => $user->id, 'property_id' => $property->id, 'status' => 'panding'])->get();
+        $theOwnerShip = count($shereFunder) / $property->funder_count  * 100;
+        $investedAmount = count($shereFunder) * $property->property_price / $property->funder_count;
 
+        // total rentel income
         $date = Carbon::now();
-        $purchase_date = Funder::where(['user_id' => $user->id, 'property_id' => $property->id])->orderBy('created_at', 'asc')->first();
-
-        $allrents = Rent::where('property_id', $property->id)->where('start_date', '<', $date)->where('start_date', '>', $purchase_date->created_at)->get();
-        $total_rent_received = 0;
-        foreach ($allrents as $rent) {
-            $total_rent_received += count($shereFunder) * $rent->monthly_income;
+        $total_rent_income = 0;
+        $all_rents = Rent::where(['property_id' => $id])->get();
+        foreach ($shereFunder as $shere) {
+            foreach ($all_rents as $rent) {
+                # code...
+                if ($shere->updated_at->between($rent->start_date, $rent->end_date)) {
+                    $monthsDifference = $shere->updated_at->diffInMonths($rent->end_date);
+                    $total_rent_income += $rent->monthly_income / $property->funder_count * $monthsDifference;
+                } elseif ($shere->lessThan($rent->start_date) && !$shere->updated_at->between($rent->start_date, $rent->end_date)) {
+                    $monthsDifference = $rent->start_date->diffInMonths($rent->end_date);
+                    $total_rent_income += $rent->monthly_income / $property->funder_count * $monthsDifference;
+                } elseif ($rent->end_date->isPast()) {
+                    $monthsDifference = $rent->start_date->diffInMonths($date);
+                    $total_rent_income += $rent->monthly_income / $property->funder_count * $monthsDifference;
+                }
+            }
         }
 
+        // // the last payment
         $the_last_payment = 0;
-        $rentActive = Rent::where(['property_id' => $property->id, 'status' => 'active'])->first();
-        $lastRent = Rent::where(['property_id' => $property->id])->orderBy('created_at', 'desc')->first();
-        if ($rentActive) {
-            $the_last_payment = $rentActive->monthly_income * count($shereFunder);
-        } elseif ($lastRent) {
-            $the_last_payment = $lastRent->monthly_income * count($shereFunder);
+
+        $oneMonthAgo = Carbon::now()->subMonth();
+        $shere_count_last_month = Funder::where(['property_id' => $id, 'user_id' => $user->id])->whereDate('updated_at', '<', $oneMonthAgo)->get();
+
+        foreach ($all_rents as $rent) {
+            if ($oneMonthAgo->between($rent->start_date, $rent->end_date)) {
+                $the_last_payment += $rent->$rent->monthly_income / $property->funder_count * count($shere_count_last_month);
+            }
         }
 
         $current_rent = $property->current_rent * count($shereFunder);
 
-        $expected_next_payment = 'The property is not rented';
-        if ($rentActive) {
-            $start_date = Carbon::parse($rentActive->start_date);
-            $day = $start_date->day;
-            $expected_next_payment  = $date->setDay($day)->formatLocalized('%d %B %Y');
+        $rent_active = Rent::where(['property_id' => $property->id, 'status' => 'active'])->first();
+        $expected_next_payment = '';
+
+        if ($rent_active) {
+            $day = $rent_active->start_date->day;
+            $today = Carbon::today();
+            $newDate = $today->day($day);
+            $dateAfterMonth = $newDate->addMonth();
+            if ($dateAfterMonth->lessThan($rent_active->end_date)) {
+                $expected_next_payment = $dateAfterMonth;
+            } else {
+                $expected_next_payment = 'The property is not rented';
+            }
+        } else {
+            $expected_next_payment = 'The property is not rented';
         }
+
 
         return response()->json([
             'property' => $property,
@@ -142,9 +168,10 @@ class WalletController extends Controller
             'current_evaluation' => $property->current_evaluation,
             'current_rent' => $current_rent,
             'invested_amount' => $investedAmount,
-            'investment_value' => $investmentValue,
-            'my_owner_ship' => $theOwnerShip,
-            'total_rent_received' => $total_rent_received,
+            'shere_funder' => $shereFunder,
+            'shere_pending' => $sherePending,
+            'my_owner_ship' => $theOwnerShip . '%',
+            'total_rent_received' => $total_rent_income,
             'the_last_payment' => $the_last_payment,
             'expected_next_payment' => $expected_next_payment,
         ]);
