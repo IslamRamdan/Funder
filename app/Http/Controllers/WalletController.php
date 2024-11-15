@@ -131,8 +131,29 @@ class WalletController extends Controller
 
         // // the last payment
         $the_last_payment = 0;
+        $rent_active = Rent::where(['property_id' => $property->id, 'status' => 'active'])->first();
+        $last_rent_not_active = Rent::where(['property_id' => $property->id, 'status' => 'not active'])->first();
 
-        $oneMonthAgo = Carbon::now()->subMonth();
+        if ($rent_active) {
+            $day = $rent_active->start_date->day;
+            $today = Carbon::today();
+            $oneMonthAgo = $today->day($day);
+        } elseif ($last_rent_not_active) {
+
+            if ($last_rent_not_active->start_date->day < $last_rent_not_active->end_date->day) {
+
+                $oneMonthAgo = $last_rent_not_active->end_date->day($last_rent_not_active->start_date->day);
+            } elseif ($last_rent_not_active->start_date->day > $last_rent_not_active->end_date->day) {
+
+                $dat = $last_rent_not_active->end_date->day($last_rent_not_active->start_date->day);
+                $oneMonthAgo = $dat->subMonth();
+            } else {
+                $oneMonthAgo = $last_rent_not_active->end_date->day($last_rent_not_active->start_date->day);
+            }
+        }
+
+
+
         $shere_count_last_month = Funder::where(['property_id' => $id, 'user_id' => $user->id])->whereDate('updated_at', '<', $oneMonthAgo)->get();
 
         foreach ($all_rents as $rent) {
@@ -141,9 +162,12 @@ class WalletController extends Controller
             }
         }
 
-        $current_rent = $property->current_rent * count($shereFunder);
+        $current_rent = 0;
 
-        $rent_active = Rent::where(['property_id' => $property->id, 'status' => 'active'])->first();
+        if ($rent_active) {
+            $current_rent = $last_rent_not_active->monthly_income - $rent_active->monthly_income;
+        }
+
         $expected_next_payment = '';
 
         if ($rent_active) {
